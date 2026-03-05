@@ -5,1385 +5,512 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HR Connect Portal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Mulish:wght@300;400;500;600&display=swap');
-
-  :root {
-    --ink: #111827;
-    --green: #059669;
-    --green-light: #10b981;
-    --green-pale: #d1fae5;
-    --amber: #d97706;
-    --amber-pale: #fef3c7;
-    --red: #dc2626;
-    --red-pale: #fee2e2;
-    --blue: #2563eb;
-    --blue-pale: #dbeafe;
-    --purple: #7c3aed;
-    --purple-pale: #ede9fe;
-    --slate: #64748b;
-    --border: #e5e7eb;
-    --bg: #f8fafc;
-    --white: #ffffff;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Mulish', sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-  }
-
-  /* LOADING */
-  #loadingScreen {
-    position: fixed;
-    inset: 0;
-    background: var(--ink);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-
-  .loader-brand {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 24px;
-  }
-
-  .loader-brand span { color: #6ee7b7; }
-
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid rgba(255,255,255,0.1);
-    border-top-color: #6ee7b7;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loader-text {
-    margin-top: 16px;
-    color: rgba(255,255,255,0.4);
-    font-size: 13px;
-  }
-
-  /* LOGIN */
-  #loginScreen {
-    min-height: 100vh;
-    display: none;
-    background: var(--ink);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .login-split {
-    display: flex;
-    min-height: 100vh;
-  }
-
-  .login-left {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 60px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .login-bg-text {
-    position: absolute;
-    font-family: 'Syne', sans-serif;
-    font-size: 220px;
-    font-weight: 800;
-    color: rgba(255,255,255,0.03);
-    bottom: -40px; left: -20px;
-    line-height: 1;
-    user-select: none;
-  }
-
-  .login-right {
-    width: 480px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px;
-  }
-
-  .login-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 48px;
-  }
-
-  .brand-icon {
-    width: 52px; height: 52px;
-    background: var(--green);
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-  }
-
-  .brand-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: white;
-  }
-
-  .brand-name span { color: #6ee7b7; }
-
-  .login-tagline {
-    font-family: 'Syne', sans-serif;
-    font-size: 52px;
-    font-weight: 800;
-    color: white;
-    line-height: 1.1;
-    margin-bottom: 24px;
-  }
-
-  .login-tagline span { color: #6ee7b7; }
-
-  .login-desc {
-    color: rgba(255,255,255,0.45);
-    font-size: 16px;
-    font-weight: 300;
-    max-width: 380px;
-    line-height: 1.7;
-  }
-
-  .feature-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 36px;
-  }
-
-  .feature-pill {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .login-form-wrap { width: 100%; }
-
-  .lf-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 6px;
-  }
-
-  .lf-sub { color: var(--slate); font-size: 14px; margin-bottom: 32px; }
-
-  .role-tabs {
-    display: flex;
-    background: var(--bg);
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 28px;
-    border: 1px solid var(--border);
-  }
-
-  .role-tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    font-family: 'Mulish', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--slate);
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .role-tab.active { background: var(--ink); color: white; }
-
-  .lf-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--slate);
-    margin-bottom: 7px;
-  }
-
-  .lf-input {
-    width: 100%;
-    padding: 13px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-family: 'Mulish', sans-serif;
-    font-size: 15px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 16px;
-    background: var(--bg);
-  }
-
-  .lf-input:focus { border-color: var(--green); background: white; }
-
-  .lf-btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--ink);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 4px;
-  }
-
-  .lf-btn:hover { background: var(--green); }
-  .lf-btn:disabled { background: var(--slate); cursor: not-allowed; }
-
-  .lf-error {
-    color: var(--red);
-    font-size: 13px;
-    margin-top: 10px;
-    text-align: center;
-    display: none;
-    background: var(--red-pale);
-    padding: 8px;
-    border-radius: 8px;
-  }
-
-  /* DASHBOARD */
-  #dashboard { display: none; }
-
-  .topbar {
-    background: var(--ink);
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    position: sticky;
-    top: 0;
-    z-index: 200;
-  }
-
-  .tb-brand {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .tb-dot {
-    width: 8px; height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  .tb-right { display: flex; align-items: center; gap: 14px; }
-
-  .tb-avatar {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    color: white;
-  }
-
-  .tb-name { color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; }
-
-  .tb-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-hr { background: #6ee7b7; color: var(--ink); }
-  .badge-assoc { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
-  .badge-mgr { background: #fbbf24; color: var(--ink); }
-
-  .tb-logout {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.5);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-family: 'Mulish', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .tb-logout:hover { background: rgba(255,255,255,0.12); color: white; }
-
-  .layout {
-    display: flex;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 32px 20px;
-    gap: 24px;
-  }
-
-  .sidebar { width: 220px; flex-shrink: 0; }
-  .main { flex: 1; min-width: 0; }
-
-  .sidebar-menu {
-    background: white;
-    border-radius: 16px;
-    padding: 8px;
-    border: 1px solid var(--border);
-    position: sticky;
-    top: 80px;
-  }
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--slate);
-    cursor: pointer;
-    transition: all 0.18s;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-  }
-
-  .menu-item:hover { background: var(--bg); color: var(--ink); }
-  .menu-item.active { background: var(--ink); color: white; }
-  .menu-divider { height: 1px; background: var(--border); margin: 6px 0; }
-
-  .card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 24px;
-    margin-bottom: 20px;
-    animation: fadeUp 0.4s ease both;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .card-title-icon {
-    width: 32px; height: 32px;
-    border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-  }
-
-  .field { margin-bottom: 14px; }
-
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--slate);
-    margin-bottom: 6px;
-  }
-
-  .finput, .ftextarea, .fselect {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 9px;
-    font-family: 'Mulish', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-    background: var(--bg);
-  }
-
-  .finput:focus, .ftextarea:focus, .fselect:focus { border-color: var(--green); background: white; }
-  .ftextarea { min-height: 100px; resize: vertical; }
-
-  .frow { display: flex; gap: 10px; }
-  .frow .field { flex: 1; }
-
-  .btn {
-    padding: 10px 20px;
-    border-radius: 9px;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-  }
-
-  .btn-primary { background: var(--ink); color: white; }
-  .btn-primary:hover { background: var(--green); }
-  .btn-green { background: var(--green); color: white; }
-  .btn-green:hover { background: var(--green-light); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-ghost { background: var(--bg); color: var(--slate); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--border); }
-  .btn-danger { background: var(--red-pale); color: var(--red); }
-  .btn-danger:hover { background: var(--red); color: white; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .tags-row, .vis-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
-
-  .tag-chip, .vis-chip {
-    padding: 5px 13px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1.5px solid var(--border);
-    background: white;
-    cursor: pointer;
-    transition: all 0.15s;
-    color: var(--slate);
-  }
-
-  .tag-chip.sel { border-color: var(--green); background: var(--green-pale); color: var(--green); }
-  .vis-chip.sel { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
-
-  .update-card {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 20px;
-    margin-bottom: 14px;
-    transition: all 0.2s;
-    animation: fadeUp 0.35s ease both;
-  }
-
-  .update-card:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 4px 20px rgba(17,24,39,0.07);
-    transform: translateY(-1px);
-  }
-
-  .uc-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-
-  .uc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-  .uc-tag {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-
-  .tag-announcement { background: var(--green-pale); color: var(--green); }
-  .tag-policy { background: var(--amber-pale); color: var(--amber); }
-  .tag-event { background: var(--blue-pale); color: var(--blue); }
-  .tag-reminder { background: var(--red-pale); color: var(--red); }
-  .tag-general { background: #f1f5f9; color: var(--slate); }
-
-  .uc-vis {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--slate);
-    background: #f1f5f9;
-    padding: 3px 9px;
-    border-radius: 20px;
-  }
-
-  .uc-date { font-size: 12px; color: var(--slate); }
-
-  .uc-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 7px;
-  }
-
-  .uc-body { font-size: 14px; color: #4b5563; line-height: 1.7; white-space: pre-wrap; }
-
-  .uc-footer {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--slate);
-  }
-
-  .poll-card {
-    background: white;
-    border-radius: 14px;
-    border: 1.5px solid var(--blue-pale);
-    padding: 20px;
-    margin-bottom: 14px;
-    animation: fadeUp 0.35s ease both;
-  }
-
-  .poll-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--blue-pale);
-    color: var(--blue);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-  }
-
-  .poll-question {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 14px;
-  }
-
-  .poll-opt-btn {
-    width: 100%;
-    padding: 11px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    font-family: 'Mulish', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.18s;
-    margin-bottom: 8px;
-    display: block;
-  }
-
-  .poll-opt-btn:hover { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
-
-  .poll-result { margin-bottom: 10px; }
-
-  .poll-result-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 5px;
-  }
-
-  .poll-bar-bg { height: 8px; background: var(--border); border-radius: 10px; overflow: hidden; }
-  .poll-bar-fill { height: 100%; background: var(--green); border-radius: 10px; transition: width 0.5s ease; }
-
-  .poll-footer {
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--slate);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .assoc-table { width: 100%; border-collapse: collapse; }
-
-  .assoc-table th {
-    text-align: left;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--slate);
-    padding: 8px 12px;
-    border-bottom: 1.5px solid var(--border);
-  }
-
-  .assoc-table td {
-    padding: 12px 12px;
-    font-size: 13px;
-    border-bottom: 1px solid rgba(229,231,235,0.7);
-    vertical-align: middle;
-  }
-
-  .assoc-table tr:last-child td { border-bottom: none; }
-
-  .status-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-
-  .status-active { background: var(--green-pale); color: var(--green); }
-  .status-inactive { background: #f1f5f9; color: var(--slate); }
-
-  .group-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: var(--purple-pale);
-    color: var(--purple);
-  }
-
-  .action-btns { display: flex; gap: 6px; }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--ink);
-  }
-
-  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-
-  .filter-pill {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: white;
-    color: var(--slate);
-    transition: all 0.15s;
-  }
-
-  .filter-pill.active { background: var(--ink); color: white; border-color: var(--ink); }
-
-  .poll-opt-input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: center;
-  }
-
-  .poll-opt-input-row .finput { margin: 0; }
-
-  .remove-opt {
-    background: none;
-    border: none;
-    color: var(--red);
-    font-size: 18px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .empty {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--slate);
-  }
-
-  .empty-icon { font-size: 44px; margin-bottom: 12px; }
-  .empty-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
-  .empty-sub { font-size: 13px; }
-
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-
-  .stat-card {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 18px 20px;
-    animation: fadeUp 0.3s ease both;
-  }
-
-  .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--ink);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .stat-label { font-size: 12px; color: var(--slate); font-weight: 600; }
-
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--ink);
-    color: white;
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 9999;
-    animation: slideIn 0.3s ease;
-    display: none;
-  }
-
-  @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-
-  @media (max-width: 768px) {
-    .login-left { display: none; }
-    .login-right { width: 100%; }
-    .layout { flex-direction: column; padding: 16px; }
-    .sidebar { width: 100%; }
-    .sidebar-menu { display: flex; overflow-x: auto; gap: 4px; position: static; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .frow { flex-direction: column; }
-  }
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Mulish:wght@400;600;700&display=swap');
+:root{--ink:#111827;--green:#059669;--gl:#10b981;--gp:#d1fae5;--amber:#d97706;--ap:#fef3c7;--red:#dc2626;--rp:#fee2e2;--blue:#2563eb;--bp:#dbeafe;--pu:#7c3aed;--pp:#ede9fe;--sl:#64748b;--bd:#e5e7eb;--bg:#f8fafc}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Mulish,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+#app{min-height:100vh}
+.login-wrap{display:flex;min-height:100vh;background:var(--ink)}
+.login-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative}
+.login-bg{position:absolute;font-family:Syne,sans-serif;font-size:200px;font-weight:800;color:rgba(255,255,255,0.03);bottom:-20px;left:-10px;user-select:none}
+.login-right{width:460px;background:white;display:flex;align-items:center;justify-content:center;padding:48px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.brand-icon{width:48px;height:48px;background:var(--green);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.brand-name{font-family:Syne,sans-serif;font-size:22px;font-weight:700;color:white}
+.brand-name em{color:#6ee7b7;font-style:normal}
+.tagline{font-family:Syne,sans-serif;font-size:48px;font-weight:800;color:white;line-height:1.1;margin-bottom:20px}
+.tagline em{color:#6ee7b7;font-style:normal}
+.tagdesc{color:rgba(255,255,255,0.4);font-size:15px;line-height:1.7;max-width:360px}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:28px}
+.pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55);padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600}
+.lf{width:100%}
+.lf h2{font-family:Syne,sans-serif;font-size:26px;font-weight:700;margin-bottom:4px}
+.lf p{color:var(--sl);font-size:14px;margin-bottom:24px}
+.rtabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:20px;border:1px solid var(--bd)}
+.rtab{flex:1;padding:9px;border:none;background:transparent;font-family:Mulish,sans-serif;font-size:13px;font-weight:700;color:var(--sl);border-radius:8px;cursor:pointer;transition:all 0.2s}
+.rtab.on{background:var(--ink);color:white}
+.flabel{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--sl);margin-bottom:6px}
+.finp{width:100%;padding:12px 14px;border:1.5px solid var(--bd);border-radius:9px;font-family:Mulish,sans-serif;font-size:14px;color:var(--ink);outline:none;background:var(--bg);margin-bottom:14px;transition:border-color 0.2s}
+.finp:focus{border-color:var(--green);background:white}
+.lbtn{width:100%;padding:13px;background:var(--ink);border:none;border-radius:9px;color:white;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s;margin-top:4px}
+.lbtn:hover{background:var(--green)}
+.lbtn:disabled{background:var(--sl);cursor:not-allowed}
+.lerr{color:var(--red);font-size:13px;margin-top:10px;display:none;background:var(--rp);padding:8px;border-radius:7px;text-align:center}
+.dbst{font-size:11px;margin-top:10px;text-align:center;padding:5px;border-radius:6px;background:#f1f5f9;color:var(--sl)}
+.dash{display:none}
+.topbar{background:var(--ink);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100}
+.tb-brand{font-family:Syne,sans-serif;font-size:17px;font-weight:700;color:white;display:flex;align-items:center;gap:8px}
+.tb-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.tb-r{display:flex;align-items:center;gap:12px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Syne,sans-serif;font-weight:700;font-size:11px;color:white}
+.tbname{color:rgba(255,255,255,0.8);font-size:13px;font-weight:600}
+.tbbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase}
+.bhr{background:#6ee7b7;color:var(--ink)}
+.bas{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)}
+.bmg{background:#fbbf24;color:var(--ink)}
+.tblout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:5px 13px;border-radius:7px;font-family:Mulish,sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
+.tblout:hover{background:rgba(255,255,255,0.12);color:white}
+.layout{display:flex;max-width:1080px;margin:0 auto;padding:28px 18px;gap:20px}
+.sidebar{width:210px;flex-shrink:0}
+.smenu{background:white;border-radius:14px;padding:7px;border:1px solid var(--bd);position:sticky;top:74px}
+.mi{display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:9px;font-size:13px;font-weight:600;color:var(--sl);cursor:pointer;transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
+.mi:hover{background:var(--bg);color:var(--ink)}
+.mi.on{background:var(--ink);color:white}
+.mdiv{height:1px;background:var(--bd);margin:5px 0}
+.main{flex:1;min-width:0}
+.card{background:white;border-radius:14px;border:1px solid var(--bd);padding:22px;margin-bottom:18px;animation:fu 0.35s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ct{font-family:Syne,sans-serif;font-size:16px;font-weight:700;margin-bottom:16px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--sl);margin-bottom:5px}
+.fi,.ft,.fs{width:100%;padding:10px 13px;border:1.5px solid var(--bd);border-radius:8px;font-family:Mulish,sans-serif;font-size:14px;color:var(--ink);outline:none;background:var(--bg);transition:border-color 0.2s}
+.fi:focus,.ft:focus,.fs:focus{border-color:var(--green);background:white}
+.ft{min-height:95px;resize:vertical}
+.fr{display:flex;gap:9px}
+.fr .fld{flex:1}
+.btn{padding:9px 18px;border-radius:8px;font-family:Syne,sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+.bp2{background:var(--ink);color:white}
+.bp2:hover{background:var(--green)}
+.bg2{background:var(--green);color:white}
+.bg2:hover{background:var(--gl)}
+.bsm{padding:5px 11px;font-size:11px}
+.bgh{background:var(--bg);color:var(--sl);border:1px solid var(--bd)}
+.bgh:hover{background:var(--bd)}
+.bdr{background:var(--rp);color:var(--red)}
+.bdr:hover{background:var(--red);color:white}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.trow,.vrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tchip,.vchip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bd);background:white;cursor:pointer;transition:all 0.15s;color:var(--sl)}
+.tchip.on{border-color:var(--green);background:var(--gp);color:var(--green)}
+.vchip.on{border-color:var(--blue);background:var(--bp);color:var(--blue)}
+.uc{background:white;border-radius:13px;border:1px solid var(--bd);padding:18px;margin-bottom:12px;transition:all 0.2s;animation:fu 0.3s ease both}
+.uc:hover{border-color:#d1d5db;box-shadow:0 3px 16px rgba(17,24,39,0.06);transform:translateY(-1px)}
+.uctop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ucmeta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.utag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase}
+.ta{background:var(--gp);color:var(--green)}
+.tp{background:var(--ap);color:var(--amber)}
+.te{background:var(--bp);color:var(--blue)}
+.tr2{background:var(--rp);color:var(--red)}
+.tg{background:#f1f5f9;color:var(--sl)}
+.uvis{font-size:10px;font-weight:600;color:var(--sl);background:#f1f5f9;padding:2px 8px;border-radius:20px}
+.udate{font-size:11px;color:var(--sl)}
+.utitle{font-family:Syne,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px}
+.ubody{font-size:13px;color:#4b5563;line-height:1.7;white-space:pre-wrap}
+.ufoot{margin-top:12px;padding-top:10px;border-top:1px solid var(--bd);font-size:11px;color:var(--sl);display:flex;justify-content:space-between}
+.pc{background:white;border-radius:13px;border:1.5px solid var(--bp);padding:18px;margin-bottom:12px;animation:fu 0.3s ease both}
+.pbadge{display:inline-flex;background:var(--bp);color:var(--blue);font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;margin-bottom:8px;text-transform:uppercase}
+.pq{font-family:Syne,sans-serif;font-size:15px;font-weight:700;margin-bottom:12px}
+.pob{width:100%;padding:10px 14px;border:1.5px solid var(--bd);border-radius:9px;background:var(--bg);font-family:Mulish,sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;transition:all 0.15s;margin-bottom:7px;display:block}
+.pob:hover{border-color:var(--blue);background:var(--bp);color:var(--blue)}
+.pres{margin-bottom:9px}
+.prl{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px}
+.pbb{height:7px;background:var(--bd);border-radius:10px;overflow:hidden}
+.pbf{height:100%;background:var(--green);border-radius:10px;transition:width 0.5s}
+.pfoot{margin-top:10px;font-size:11px;color:var(--sl);display:flex;justify-content:space-between;align-items:center}
+.at{width:100%;border-collapse:collapse}
+.at th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--sl);padding:7px 10px;border-bottom:1.5px solid var(--bd)}
+.at td{padding:11px 10px;font-size:12px;border-bottom:1px solid rgba(229,231,235,0.6);vertical-align:middle}
+.at tr:last-child td{border-bottom:none}
+.sdot{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.sact{background:var(--gp);color:var(--green)}
+.sinact{background:#f1f5f9;color:var(--sl)}
+.gbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--pp);color:var(--pu)}
+.abts{display:flex;gap:5px}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.ptitle{font-family:Syne,sans-serif;font-size:20px;font-weight:800}
+.fr2{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.fpill{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--bd);background:white;color:var(--sl);transition:all 0.15s}
+.fpill.on{background:var(--ink);color:white;border-color:var(--ink)}
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.sc{background:white;border-radius:13px;border:1px solid var(--bd);padding:16px 18px;animation:fu 0.3s ease both}
+.sv{font-family:Syne,sans-serif;font-size:30px;font-weight:800;line-height:1;margin-bottom:3px}
+.sl2{font-size:11px;color:var(--sl);font-weight:600}
+.por{display:flex;gap:7px;margin-bottom:7px;align-items:center}
+.ro{background:none;border:none;color:var(--red);font-size:17px;cursor:pointer;flex-shrink:0}
+.empty{text-align:center;padding:44px 20px;color:var(--sl)}
+.ei{font-size:40px;margin-bottom:10px}
+.et{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.es{font-size:12px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:white;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none}
+@media(max-width:700px){.login-left{display:none}.login-right{width:100%}.layout{flex-direction:column;padding:14px}.sidebar{width:100%}.smenu{display:flex;overflow-x:auto;gap:3px;position:static}.sr{grid-template-columns:repeat(2,1fr)}.fr{flex-direction:column}}
 </style>
 </head>
 <body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
 
-<!-- LOADING -->
-<div id="loadingScreen">
-  <div class="loader-brand">HR <span>Connect</span></div>
-  <div class="spinner"></div>
-  <div class="loader-text">Connecting to database...</div>
-</div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore,collection,doc,addDoc,getDocs,updateDoc,deleteDoc,query,orderBy,onSnapshot,serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firestore.js';
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-split">
+const FC = {apiKey:"AIzaSyA-5I3dKQnFaYF0I1tOUyYcRP-mhgEBlW0",authDomain:"hr-connect-3c286.firebaseapp.com",projectId:"hr-connect-3c286",storageBucket:"hr-connect-3c286.firebasestorage.app",messagingSenderId:"415534691338",appId:"1:415534691338:web:0cad0e7f1c6fbaca375bf3"};
+const app = initializeApp(FC);
+const db = getFirestore(app);
+
+const S = {user:null,assocs:[],updates:[],tag:'announcement',vis:['all'],popts:['',''],filter:'all',page:'feed',role:'associate',unsub:null,ready:false};
+const HR = {id:'HRADMIN',name:'HR Admin',role:'hr',group:'all'};
+const HRPWD = 'hr@2024';
+const GROUPS = ['all','managers','sales','it','hr','operations'];
+const TAGS = [{k:'announcement',l:'Announcement'},{k:'policy',l:'Policy'},{k:'event',l:'Event'},{k:'reminder',l:'Reminder'},{k:'general',l:'General'}];
+
+// Show login immediately - no loading screen
+showLogin();
+loadAssocs();
+
+function showLogin() {
+  document.getElementById('app').innerHTML = `
+  <div class="login-wrap">
     <div class="login-left">
-      <div class="login-bg-text">HR</div>
-      <div class="login-brand">
-        <div class="brand-icon">🏢</div>
-        <div class="brand-name">HR <span>Connect</span></div>
-      </div>
-      <div class="login-tagline">Your team,<br><span>always</span><br>informed.</div>
-      <div class="login-desc">A secure portal for HR to share updates, run polls, and manage your workforce — all in one place.</div>
-      <div class="feature-pills">
-        <span class="feature-pill">📢 Announcements</span>
-        <span class="feature-pill">📊 Live Polls</span>
-        <span class="feature-pill">🔒 Group Access</span>
-        <span class="feature-pill">👥 Team Management</span>
-        <span class="feature-pill">🚫 Deactivate Users</span>
+      <div class="login-bg">HR</div>
+      <div class="brand"><div class="brand-icon">&#127970;</div><div class="brand-name">HR <em>Connect</em></div></div>
+      <div class="tagline">Your team,<br><em>always</em><br>informed.</div>
+      <div class="tagdesc">A secure portal for HR to share updates, run polls, and manage your workforce.</div>
+      <div class="pills">
+        <span class="pill">Announcements</span>
+        <span class="pill">Live Polls</span>
+        <span class="pill">Group Access</span>
+        <span class="pill">Team Management</span>
       </div>
     </div>
     <div class="login-right">
-      <div class="login-form-wrap">
-        <div class="lf-title">Sign in</div>
-        <p class="lf-sub">Enter your credentials to continue</p>
-        <div class="role-tabs">
-          <button class="role-tab active" onclick="setRole('associate')">👤 Associate</button>
-          <button class="role-tab" onclick="setRole('manager')">🎯 Manager</button>
-          <button class="role-tab" onclick="setRole('hr')">🔑 HR Admin</button>
+      <div class="lf">
+        <h2>Sign in</h2>
+        <p>Enter your credentials to continue</p>
+        <div class="rtabs">
+          <button class="rtab on" onclick="setRole('associate')">Associate</button>
+          <button class="rtab" onclick="setRole('manager')">Manager</button>
+          <button class="rtab" onclick="setRole('hr')">HR Admin</button>
         </div>
-        <div class="field">
-          <label id="idLabel">Employee ID</label>
-          <input class="lf-input" id="loginId" type="text" placeholder="e.g. EMP001" />
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input class="lf-input" id="loginPwd" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" />
-        </div>
-        <button class="lf-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
-        <div class="lf-error" id="loginError">❌ Invalid credentials. Please try again.</div>
+        <label class="flabel" id="idlabel">Employee ID</label>
+        <input class="finp" id="lid" type="text" placeholder="e.g. EMP001" />
+        <label class="flabel">Password</label>
+        <input class="finp" id="lpwd" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" />
+        <button class="lbtn" id="lbtn" onclick="doLogin()">Sign In</button>
+        <div class="lerr" id="lerr"></div>
+        <div class="dbst" id="dbst">Connecting to database...</div>
       </div>
     </div>
-  </div>
-</div>
+  </div>`;
+}
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div class="topbar">
-    <div class="tb-brand">
-      <div class="tb-dot"></div>
-      HR Connect
-    </div>
-    <div class="tb-right">
-      <div class="tb-avatar" id="tbAvatar" style="background:var(--green)">?</div>
-      <span class="tb-name" id="tbName">User</span>
-      <span class="tb-badge" id="tbBadge">Associate</span>
-      <button class="tb-logout" onclick="logout()">Sign out</button>
-    </div>
-  </div>
-  <div class="layout">
-    <div class="sidebar">
-      <div class="sidebar-menu" id="sidebarMenu"></div>
-    </div>
-    <div class="main" id="mainContent"></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- FIREBASE -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore, collection, doc, addDoc, getDocs, getDoc,
-    updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA-5I3dKQnFaYF0I1tOUyYcRP-mhgEBlW0",
-    authDomain: "hr-connect-3c286.firebaseapp.com",
-    projectId: "hr-connect-3c286",
-    storageBucket: "hr-connect-3c286.firebasestorage.app",
-    messagingSenderId: "415534691338",
-    appId: "1:415534691338:web:0cad0e7f1c6fbaca375bf3"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // ===== STATE =====
-  const S = {
-    currentUser: null,
-    associates: [],
-    updates: [],
-    selectedTag: 'announcement',
-    selectedVisibility: ['all'],
-    pollOptions: ['', ''],
-    activeFilter: 'all',
-    activePage: 'feed',
-    loginRole: 'associate',
-    unsubscribe: null,
-  };
-
-  const HR = { id: 'HRADMIN', name: 'HR Admin', role: 'hr', group: 'all' };
-  const HR_PWD = 'hr@2024';
-  const GROUPS = ['all', 'managers', 'sales', 'it', 'hr', 'operations'];
-  const TAGS = [
-    { key: 'announcement', label: '📢 Announcement' },
-    { key: 'policy', label: '📋 Policy' },
-    { key: 'event', label: '🎉 Event' },
-    { key: 'reminder', label: '⏰ Reminder' },
-    { key: 'general', label: '💬 General' },
-  ];
-
-  // ===== INIT =====
-  async function init() {
-    try {
-      await Promise.race([
-        loadAssociates(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
-      ]);
-    } catch(e) {
-      console.warn('Firebase init issue:', e);
-    } finally {
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('loginScreen').style.display = 'flex';
-    }
+async function loadAssocs() {
+  try {
+    const snap = await getDocs(collection(db,'associates'));
+    S.assocs = snap.docs.map(d=>({fid:d.id,...d.data()}));
+    S.ready = true;
+    const el = document.getElementById('dbst');
+    if (el) { el.textContent = 'Database connected'; el.style.background='#d1fae5'; el.style.color='#059669'; }
+  } catch(e) {
+    console.error('DB error:',e);
+    const el = document.getElementById('dbst');
+    if (el) { el.textContent = 'DB offline - HR login still works'; }
   }
+}
 
-  async function loadAssociates() {
-    try {
-      const snap = await getDocs(collection(db, 'associates'));
-      S.associates = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-    } catch (e) {
-      console.error('Load associates error:', e);
-    }
-  }
+window.setRole = function(r) {
+  S.role = r;
+  document.querySelectorAll('.rtab').forEach((b,i)=>b.classList.toggle('on',['associate','manager','hr'][i]===r));
+  document.getElementById('idlabel').textContent = {associate:'Employee ID',manager:'Manager ID',hr:'HR Admin ID'}[r];
+};
 
-  // ===== AUTH =====
-  window.setRole = function(r) {
-    S.loginRole = r;
-    document.querySelectorAll('.role-tab').forEach((b, i) => {
-      b.classList.toggle('active', ['associate','manager','hr'][i] === r);
-    });
-    const labels = { associate: 'Employee ID', manager: 'Manager ID', hr: 'HR Admin ID' };
-    const placeholders = { associate: 'e.g. EMP001', manager: 'e.g. MGR001', hr: 'HRADMIN' };
-    document.getElementById('idLabel').textContent = labels[r];
-    document.getElementById('loginId').placeholder = placeholders[r];
-  };
+window.doLogin = async function() {
+  const id = document.getElementById('lid').value.trim().toUpperCase();
+  const pwd = document.getElementById('lpwd').value;
+  const btn = document.getElementById('lbtn');
+  const err = document.getElementById('lerr');
+  err.style.display='none'; btn.disabled=true; btn.textContent='Signing in...';
+  try {
+    if (id==='HRADMIN' && pwd===HRPWD) { enterDash(HR); return; }
+    if (!S.ready) await loadAssocs();
+    const u = S.assocs.find(a=>a.id===id && a.password===pwd);
+    if (!u) { showErr('Invalid credentials.'); return; }
+    if (u.status==='inactive') { showErr('Account deactivated. Contact HR.'); return; }
+    enterDash(u);
+  } catch(e) { showErr('Connection error. Try again.'); }
+  finally { btn.disabled=false; btn.textContent='Sign In'; }
+};
 
-  window.doLogin = async function() {
-    const id = document.getElementById('loginId').value.trim().toUpperCase();
-    const pwd = document.getElementById('loginPwd').value;
-    const btn = document.getElementById('loginBtn');
-    const err = document.getElementById('loginError');
-    err.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Signing in...';
+function showErr(m) {
+  const e = document.getElementById('lerr');
+  e.textContent=m; e.style.display='block';
+  setTimeout(()=>e.style.display='none',4000);
+}
 
-    try {
-      if (id === 'HRADMIN' && pwd === HR_PWD) {
-        enterDashboard(HR); return;
-      }
-
-      await loadAssociates();
-      const user = S.associates.find(a => a.id === id && a.password === pwd);
-      if (!user) { showErr('❌ Invalid credentials. Please try again.'); return; }
-      if (user.status === 'inactive') { showErr('🚫 Your account is deactivated. Contact HR.'); return; }
-      if (S.loginRole === 'manager' && user.role !== 'manager') { showErr('❌ Invalid credentials.'); return; }
-      if (S.loginRole === 'associate' && user.role !== 'associate') { showErr('❌ Invalid credentials.'); return; }
-      enterDashboard(user);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Sign In →';
-    }
-  };
-
-  function showErr(msg) {
-    const e = document.getElementById('loginError');
-    e.textContent = msg;
-    e.style.display = 'block';
-    setTimeout(() => e.style.display = 'none', 4000);
-  }
-
-  function enterDashboard(user) {
-    S.currentUser = user;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-
-    const initials = user.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('tbAvatar').textContent = initials;
-    document.getElementById('tbName').textContent = user.name;
-
-    const badge = document.getElementById('tbBadge');
-    const av = document.getElementById('tbAvatar');
-    if (user.role === 'hr') { badge.textContent = 'HR Admin'; badge.className = 'tb-badge badge-hr'; av.style.background = '#059669'; }
-    else if (user.role === 'manager') { badge.textContent = 'Manager'; badge.className = 'tb-badge badge-mgr'; av.style.background = '#d97706'; }
-    else { badge.textContent = 'Associate'; badge.className = 'tb-badge badge-assoc'; av.style.background = '#6366f1'; }
-
-    S.activePage = 'feed';
-    subscribeToUpdates();
-    renderSidebar();
-    renderPage();
-  }
-
-  window.logout = function() {
-    if (S.unsubscribe) S.unsubscribe();
-    S.currentUser = null;
-    S.activePage = 'feed';
-    S.activeFilter = 'all';
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('loginId').value = '';
-    document.getElementById('loginPwd').value = '';
-  };
-
-  // ===== REALTIME UPDATES =====
-  function subscribeToUpdates() {
-    if (S.unsubscribe) S.unsubscribe();
-    const q = query(collection(db, 'updates'), orderBy('createdAt', 'desc'));
-    S.unsubscribe = onSnapshot(q, snap => {
-      S.updates = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
-      if (S.activePage === 'feed') renderPage();
-    });
-  }
-
-  // ===== SIDEBAR =====
-  function renderSidebar() {
-    const isHR = S.currentUser?.role === 'hr';
-    let items = [{ id: 'feed', icon: '📋', label: 'Updates Feed' }];
-    if (isHR) {
-      items.push(
-        { id: 'post', icon: '📢', label: 'Post Update' },
-        { id: 'poll', icon: '📊', label: 'Create Poll' },
-        { divider: true },
-        { id: 'associates', icon: '👥', label: 'Manage Associates' },
-      );
-    }
-    document.getElementById('sidebarMenu').innerHTML = items.map(item => {
-      if (item.divider) return '<div class="menu-divider"></div>';
-      return `<button class="menu-item ${S.activePage===item.id?'active':''}" onclick="navTo('${item.id}')">
-        <span>${item.icon}</span> ${item.label}
-      </button>`;
-    }).join('');
-  }
-
-  window.navTo = function(page) {
-    S.activePage = page;
-    renderSidebar();
-    renderPage();
-  };
-
-  // ===== PAGES =====
-  function renderPage() {
-    const p = S.activePage;
-    const main = document.getElementById('mainContent');
-    if (p === 'feed') renderFeedPage(main);
-    else if (p === 'post') renderPostPage(main);
-    else if (p === 'poll') renderPollPage(main);
-    else if (p === 'associates') renderAssocPage(main);
-  }
-
-  // FEED
-  function renderFeedPage(main) {
-    const u = S.currentUser;
-    const isHR = u.role === 'hr';
-
-    let items = S.updates.filter(upd => {
-      if (isHR) return true;
-      return upd.visibility?.includes('all') || upd.visibility?.includes(u.group);
-    });
-
-    if (S.activeFilter !== 'all') {
-      items = items.filter(i => i.type === 'poll' ? S.activeFilter === 'poll' : i.tag === S.activeFilter);
-    }
-
-    const stats = isHR ? `
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-val">${S.associates.filter(a=>a.status==='active').length}</div><div class="stat-label">Active Associates</div></div>
-        <div class="stat-card"><div class="stat-val">${S.updates.filter(u=>u.type==='update').length}</div><div class="stat-label">Updates Posted</div></div>
-        <div class="stat-card"><div class="stat-val">${S.updates.filter(u=>u.type==='poll').length}</div><div class="stat-label">Polls Created</div></div>
-        <div class="stat-card"><div class="stat-val">${S.associates.filter(a=>a.status==='inactive').length}</div><div class="stat-label">Deactivated</div></div>
-      </div>` : '';
-
-    const filters = ['all','announcement','policy','event','reminder','poll'];
-    const filterLabels = { all:'All', announcement:'📢 Announcements', policy:'📋 Policy', event:'🎉 Events', reminder:'⏰ Reminders', poll:'📊 Polls' };
-
-    main.innerHTML = `
-      ${stats}
-      <div class="page-header"><div class="page-title">Updates Feed</div></div>
-      <div class="filter-row">${filters.map(f=>`<button class="filter-pill ${S.activeFilter===f?'active':''}" onclick="setFilter('${f}')">${filterLabels[f]}</button>`).join('')}</div>
-      <div id="feedList"></div>`;
-
-    const list = document.getElementById('feedList');
-    if (!items.length) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No updates yet</div><div class="empty-sub">${isHR?'Post your first update!':'Check back soon.'}</div></div>`;
-      return;
-    }
-    list.innerHTML = items.map((item, i) => item.type === 'poll' ? renderPollCard(item, isHR, i) : renderUpdateCard(item, isHR, i)).join('');
-  }
-
-  window.setFilter = function(f) { S.activeFilter = f; renderPage(); };
-
-  function renderUpdateCard(u, isHR, idx) {
-    const tag = TAGS.find(t => t.key === u.tag) || TAGS[4];
-    const visLabel = u.visibility?.includes('all') ? '🌐 All Staff' : '🔒 ' + (u.visibility||[]).map(v=>v.charAt(0).toUpperCase()+v.slice(1)).join(', ');
-    return `<div class="update-card" style="animation-delay:${idx*0.05}s">
-      <div class="uc-top">
-        <div class="uc-meta">
-          <span class="uc-tag tag-${u.tag}">${tag.label}</span>
-          <span class="uc-vis">${visLabel}</span>
-          <span class="uc-date">${fmtDate(u.createdAt)}</span>
-        </div>
-        ${isHR ? `<button class="btn btn-danger btn-sm" onclick="deleteItem('${u.firestoreId}')">🗑 Delete</button>` : ''}
+function enterDash(user) {
+  S.user = user;
+  const ini = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const bc = user.role==='hr'?'#059669':user.role==='manager'?'#d97706':'#6366f1';
+  const bb = user.role==='hr'?'bhr':user.role==='manager'?'bmg':'bas';
+  const bl = user.role==='hr'?'HR Admin':user.role==='manager'?'Manager':'Associate';
+  document.getElementById('app').innerHTML = `
+  <div class="dash" id="dash" style="display:block">
+    <div class="topbar">
+      <div class="tb-brand"><div class="tb-dot"></div>HR Connect</div>
+      <div class="tb-r">
+        <div class="av" style="background:${bc}">${ini}</div>
+        <span class="tbname">${esc(user.name)}</span>
+        <span class="tbbadge ${bb}">${bl}</span>
+        <button class="tblout" onclick="doLogout()">Sign out</button>
       </div>
-      <div class="uc-title">${esc(u.title)}</div>
-      <div class="uc-body">${esc(u.body)}</div>
-      <div class="uc-footer"><span>Posted by ${esc(u.author)}</span></div>
+    </div>
+    <div class="layout">
+      <div class="sidebar"><div class="smenu" id="smenu"></div></div>
+      <div class="main" id="main"></div>
+    </div>
+  </div>`;
+  S.page='feed';
+  subUpdates();
+  renderMenu();
+  renderPage();
+}
+
+window.doLogout = function() {
+  if (S.unsub) S.unsub();
+  S.user=null; S.page='feed'; S.filter='all';
+  showLogin(); loadAssocs();
+};
+
+function subUpdates() {
+  if (S.unsub) S.unsub();
+  try {
+    const q = query(collection(db,'updates'),orderBy('createdAt','desc'));
+    S.unsub = onSnapshot(q, snap=>{
+      S.updates = snap.docs.map(d=>({fid:d.id,...d.data()}));
+      if (S.page==='feed') renderPage();
+    }, e=>console.error(e));
+  } catch(e){console.error(e);}
+}
+
+function renderMenu() {
+  const isHR = S.user?.role==='hr';
+  let items = [{id:'feed',icon:'&#128203;',label:'Updates Feed'}];
+  if (isHR) items.push(
+    {id:'post',icon:'&#128226;',label:'Post Update'},
+    {id:'poll',icon:'&#128202;',label:'Create Poll'},
+    {div:true},
+    {id:'associates',icon:'&#128101;',label:'Manage Associates'}
+  );
+  document.getElementById('smenu').innerHTML = items.map(i=>{
+    if(i.div) return '<div class="mdiv"></div>';
+    return `<button class="mi ${S.page===i.id?'on':''}" onclick="goTo('${i.id}')">${i.icon} ${i.label}</button>`;
+  }).join('');
+}
+
+window.goTo = function(p){S.page=p;renderMenu();renderPage();};
+
+function renderPage() {
+  const main = document.getElementById('main');
+  if(!main) return;
+  if(S.page==='feed') renderFeed(main);
+  else if(S.page==='post') renderPost(main);
+  else if(S.page==='poll') renderPoll(main);
+  else if(S.page==='associates') renderAssocs(main);
+}
+
+function renderFeed(main) {
+  const u=S.user, isHR=u.role==='hr';
+  let items = S.updates.filter(upd=>isHR||upd.visibility?.includes('all')||upd.visibility?.includes(u.group));
+  if(S.filter!=='all') items=items.filter(i=>i.type==='poll'?S.filter==='poll':i.tag===S.filter);
+  const stats = isHR?`<div class="sr">
+    <div class="sc"><div class="sv">${S.assocs.filter(a=>a.status==='active').length}</div><div class="sl2">Active Associates</div></div>
+    <div class="sc"><div class="sv">${S.updates.filter(u=>u.type==='update').length}</div><div class="sl2">Updates Posted</div></div>
+    <div class="sc"><div class="sv">${S.updates.filter(u=>u.type==='poll').length}</div><div class="sl2">Polls</div></div>
+    <div class="sc"><div class="sv">${S.assocs.filter(a=>a.status==='inactive').length}</div><div class="sl2">Deactivated</div></div>
+  </div>`:'';
+  const fls=['all','announcement','policy','event','reminder','poll'];
+  const fln={all:'All',announcement:'Announcements',policy:'Policy',event:'Events',reminder:'Reminders',poll:'Polls'};
+  main.innerHTML=`${stats}
+    <div class="ph"><div class="ptitle">Updates Feed</div></div>
+    <div class="fr2">${fls.map(f=>`<button class="fpill ${S.filter===f?'on':''}" onclick="setFilt('${f}')">${fln[f]}</button>`).join('')}</div>
+    <div id="flist"></div>`;
+  const fl=document.getElementById('flist');
+  if(!items.length){fl.innerHTML=`<div class="empty"><div class="ei">&#128205;</div><div class="et">No updates yet</div><div class="es">${isHR?'Post your first update!':'Check back soon.'}</div></div>`;return;}
+  fl.innerHTML=items.map((item,i)=>item.type==='poll'?makePoll(item,isHR,i):makeUpdate(item,isHR,i)).join('');
+}
+
+window.setFilt=f=>{S.filter=f;renderPage();};
+
+function makeUpdate(u,isHR,idx){
+  const tag=TAGS.find(t=>t.k===u.tag)||TAGS[4];
+  const vis=u.visibility?.includes('all')?'All Staff':(u.visibility||[]).map(v=>v.charAt(0).toUpperCase()+v.slice(1)).join(', ');
+  const tc={announcement:'ta',policy:'tp',event:'te',reminder:'tr2',general:'tg'}[u.tag]||'tg';
+  return `<div class="uc" style="animation-delay:${idx*0.04}s">
+    <div class="uctop">
+      <div class="ucmeta">
+        <span class="utag ${tc}">${tag.l}</span>
+        <span class="uvis">${vis}</span>
+        <span class="udate">${fmt(u.createdAt)}</span>
+      </div>
+      ${isHR?`<button class="btn bdr bsm" onclick="del('${u.fid}')">Delete</button>`:''}
+    </div>
+    <div class="utitle">${esc(u.title)}</div>
+    <div class="ubody">${esc(u.body)}</div>
+    <div class="ufoot"><span>By ${esc(u.author)}</span></div>
+  </div>`;
+}
+
+function makePoll(p,isHR,idx){
+  const tot=Object.values(p.votes||{}).reduce((a,b)=>a+b,0);
+  const voted=(p.votedBy||[]).includes(S.user.id);
+  const show=isHR||voted;
+  const opts=(p.options||[]).map(opt=>{
+    if(show){const c=p.votes?.[opt]||0,pc=tot>0?Math.round(c/tot*100):0;
+      return `<div class="pres"><div class="prl"><span>${esc(opt)}</span><span>${c} votes (${pc}%)</span></div><div class="pbb"><div class="pbf" style="width:${pc}%"></div></div></div>`;}
+    return `<button class="pob" onclick="vote('${p.fid}','${esc(opt)}')">${esc(opt)}</button>`;
+  }).join('');
+  return `<div class="pc" style="animation-delay:${idx*0.04}s">
+    <div class="pbadge">Poll${voted?' - Voted':''}</div>
+    <div class="pq">${esc(p.question)}</div>
+    ${opts}
+    <div class="pfoot"><span>${tot} votes</span>${isHR?`<button class="btn bdr bsm" onclick="del('${p.fid}')">Delete</button>`:''}</div>
+  </div>`;
+}
+
+window.vote=async function(pid,opt){
+  const poll=S.updates.find(u=>u.fid===pid);
+  if(!poll||(poll.votedBy||[]).includes(S.user.id))return;
+  const nv={...poll.votes,[opt]:(poll.votes?.[opt]||0)+1};
+  const nb=[...(poll.votedBy||[]),S.user.id];
+  await updateDoc(doc(db,'updates',pid),{votes:nv,votedBy:nb});
+  toastMsg('Vote submitted!');
+};
+
+window.del=async function(id){
+  if(!confirm('Delete?'))return;
+  await deleteDoc(doc(db,'updates',id));
+  toastMsg('Deleted');
+};
+
+function renderPost(main){
+  const th=TAGS.map(t=>`<span class="tchip ${S.tag===t.k?'on':''}" onclick="setTag('${t.k}')">${t.l}</span>`).join('');
+  const vh=GROUPS.map(g=>`<span class="vchip ${S.vis.includes(g)?'on':''}" onclick="togVis('${g}')">${g==='all'?'All Staff':g.charAt(0).toUpperCase()+g.slice(1)}</span>`).join('');
+  main.innerHTML=`<div class="ph"><div class="ptitle">Post an Update</div></div>
+    <div class="card">
+      <div class="fld"><label>Title</label><input class="fi" id="pt" placeholder="Update title..."/></div>
+      <div class="fld"><label>Message</label><textarea class="ft" id="pb" placeholder="Write your message..."></textarea></div>
+      <div class="fld"><label>Tag</label><div class="trow">${th}</div></div>
+      <div class="fld"><label>Visible To</label><div class="vrow">${vh}</div></div>
+      <button class="btn bp2" id="pbtn" onclick="subPost()">Publish Update</button>
     </div>`;
+}
+
+window.setTag=t=>{S.tag=t;renderPage();};
+window.togVis=function(g){
+  if(g==='all'){S.vis=['all'];}
+  else{
+    S.vis=S.vis.filter(v=>v!=='all');
+    if(S.vis.includes(g))S.vis=S.vis.filter(v=>v!==g); else S.vis.push(g);
+    if(!S.vis.length)S.vis=['all'];
   }
+  renderPage();
+};
 
-  function renderPollCard(p, isHR, idx) {
-    const total = Object.values(p.votes||{}).reduce((a,b)=>a+b,0);
-    const hasVoted = (p.votedBy||[]).includes(S.currentUser.id);
-    const showResults = isHR || hasVoted;
+window.subPost=async function(){
+  const t=document.getElementById('pt').value.trim(), b=document.getElementById('pb').value.trim();
+  if(!t||!b){alert('Fill in title and message.');return;}
+  const btn=document.getElementById('pbtn'); btn.disabled=true; btn.textContent='Publishing...';
+  try{
+    await addDoc(collection(db,'updates'),{type:'update',title:t,body:b,tag:S.tag,visibility:[...S.vis],author:S.user.name,createdAt:serverTimestamp()});
+    S.tag='announcement';S.vis=['all'];S.page='feed';renderMenu();renderPage();toastMsg('Update published!');
+  }finally{btn.disabled=false;btn.textContent='Publish Update';}
+};
 
-    const optsHtml = (p.options||[]).map(opt => {
-      if (showResults) {
-        const count = p.votes?.[opt] || 0;
-        const pct = total > 0 ? Math.round((count/total)*100) : 0;
-        return `<div class="poll-result">
-          <div class="poll-result-label"><span>${esc(opt)}</span><span>${count} votes (${pct}%)</span></div>
-          <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:${pct}%"></div></div>
-        </div>`;
-      }
-      return `<button class="poll-opt-btn" onclick="castVote('${p.firestoreId}','${esc(opt)}')">${esc(opt)}</button>`;
-    }).join('');
-
-    return `<div class="poll-card" style="animation-delay:${idx*0.05}s">
-      <div class="poll-badge">📊 Poll${hasVoted?' — You voted':''}</div>
-      <div class="poll-question">${esc(p.question)}</div>
-      ${optsHtml}
-      <div class="poll-footer">
-        <span>${total} total votes</span>
-        ${isHR ? `<button class="btn btn-danger btn-sm" onclick="deleteItem('${p.firestoreId}')">🗑 Delete</button>` : ''}
-      </div>
+function renderPoll(main){
+  const oh=S.popts.map((o,i)=>`<div class="por"><input class="fi" value="${esc(o)}" oninput="S.popts[${i}]=this.value" placeholder="Option ${i+1}..."/>${S.popts.length>2?`<button class="ro" onclick="remOpt(${i})">x</button>`:''}</div>`).join('');
+  const vh=GROUPS.map(g=>`<span class="vchip ${S.vis.includes(g)?'on':''}" onclick="togVis('${g}')">${g==='all'?'All Staff':g.charAt(0).toUpperCase()+g.slice(1)}</span>`).join('');
+  main.innerHTML=`<div class="ph"><div class="ptitle">Create a Poll</div></div>
+    <div class="card">
+      <div class="fld"><label>Question</label><input class="fi" id="pq2" placeholder="e.g. Which day works for team lunch?"/></div>
+      <div class="fld"><label>Options</label><div id="polist">${oh}</div><button class="btn bgh bsm" onclick="addOpt()">+ Add Option</button></div>
+      <div class="fld"><label>Visible To</label><div class="vrow">${vh}</div></div>
+      <button class="btn bp2" id="pllbtn" onclick="subPoll()">Launch Poll</button>
     </div>`;
-  }
+}
 
-  window.castVote = async function(pollId, option) {
-    const poll = S.updates.find(u => u.firestoreId === pollId);
-    if (!poll || (poll.votedBy||[]).includes(S.currentUser.id)) return;
-    const newVotes = { ...poll.votes, [option]: (poll.votes?.[option]||0)+1 };
-    const newVotedBy = [...(poll.votedBy||[]), S.currentUser.id];
-    await updateDoc(doc(db, 'updates', pollId), { votes: newVotes, votedBy: newVotedBy });
-    showToast('✅ Vote submitted!');
-  };
+window.addOpt=()=>{S.popts.push('');renderPage();};
+window.remOpt=i=>{S.popts.splice(i,1);renderPage();};
 
-  window.deleteItem = async function(id) {
-    if (!confirm('Delete this item?')) return;
-    await deleteDoc(doc(db, 'updates', id));
-    showToast('🗑 Deleted successfully');
-  };
+window.subPoll=async function(){
+  const q=document.getElementById('pq2').value.trim();
+  const opts=S.popts.filter(o=>o.trim());
+  if(!q||opts.length<2){alert('Enter question and at least 2 options.');return;}
+  const btn=document.getElementById('pllbtn'); btn.disabled=true; btn.textContent='Launching...';
+  const votes={};opts.forEach(o=>votes[o]=0);
+  try{
+    await addDoc(collection(db,'updates'),{type:'poll',question:q,options:opts,votes,visibility:[...S.vis],votedBy:[],createdAt:serverTimestamp()});
+    S.popts=['',''];S.vis=['all'];S.page='feed';renderMenu();renderPage();toastMsg('Poll launched!');
+  }finally{btn.disabled=false;btn.textContent='Launch Poll';}
+};
 
-  // POST PAGE
-  function renderPostPage(main) {
-    const tagHtml = TAGS.map(t=>`<span class="tag-chip ${S.selectedTag===t.key?'sel':''}" onclick="selTag('${t.key}')">${t.label}</span>`).join('');
-    const visHtml = GROUPS.map(g=>`<span class="vis-chip ${S.selectedVisibility.includes(g)?'sel':''}" onclick="toggleVis('${g}')">${g==='all'?'🌐 All Staff':'🔒 '+g.charAt(0).toUpperCase()+g.slice(1)}</span>`).join('');
-
-    main.innerHTML = `
-      <div class="page-header"><div class="page-title">Post an Update</div></div>
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon" style="background:#d1fae5">📢</div> New Update</div>
-        <div class="field"><label>Title</label><input class="finput" id="postTitle" placeholder="Update title..." /></div>
-        <div class="field"><label>Message</label><textarea class="ftextarea" id="postBody" placeholder="Write your message..."></textarea></div>
-        <div class="field"><label>Tag</label><div class="tags-row">${tagHtml}</div></div>
-        <div class="field"><label>Visible To</label><div class="vis-row">${visHtml}</div></div>
-        <button class="btn btn-primary" id="postBtn" onclick="submitPost()">📤 Publish Update</button>
-      </div>`;
-  }
-
-  window.selTag = function(t) { S.selectedTag = t; renderPage(); };
-
-  window.toggleVis = function(g) {
-    if (g === 'all') { S.selectedVisibility = ['all']; }
-    else {
-      S.selectedVisibility = S.selectedVisibility.filter(v => v !== 'all');
-      if (S.selectedVisibility.includes(g)) S.selectedVisibility = S.selectedVisibility.filter(v => v !== g);
-      else S.selectedVisibility.push(g);
-      if (!S.selectedVisibility.length) S.selectedVisibility = ['all'];
-    }
-    renderPage();
-  };
-
-  window.submitPost = async function() {
-    const title = document.getElementById('postTitle').value.trim();
-    const body = document.getElementById('postBody').value.trim();
-    if (!title || !body) { alert('Please fill in title and message.'); return; }
-    const btn = document.getElementById('postBtn');
-    btn.disabled = true; btn.textContent = 'Publishing...';
-    try {
-      await addDoc(collection(db, 'updates'), {
-        type: 'update', title, body,
-        tag: S.selectedTag,
-        visibility: [...S.selectedVisibility],
-        author: S.currentUser.name,
-        createdAt: serverTimestamp()
-      });
-      S.selectedTag = 'announcement';
-      S.selectedVisibility = ['all'];
-      S.activePage = 'feed';
-      renderSidebar();
-      renderPage();
-      showToast('✅ Update published!');
-    } finally {
-      btn.disabled = false; btn.textContent = '📤 Publish Update';
-    }
-  };
-
-  // POLL PAGE
-  function renderPollPage(main) {
-    const optsHtml = S.pollOptions.map((opt,i)=>`
-      <div class="poll-opt-input-row">
-        <input class="finput" value="${esc(opt)}" oninput="S.pollOptions[${i}]=this.value" placeholder="Option ${i+1}..." />
-        ${S.pollOptions.length>2?`<button class="remove-opt" onclick="removeOpt(${i})">×</button>`:''}
-      </div>`).join('');
-
-    const visHtml = GROUPS.map(g=>`<span class="vis-chip ${S.selectedVisibility.includes(g)?'sel':''}" onclick="toggleVis('${g}')">${g==='all'?'🌐 All Staff':'🔒 '+g.charAt(0).toUpperCase()+g.slice(1)}</span>`).join('');
-
-    main.innerHTML = `
-      <div class="page-header"><div class="page-title">Create a Poll</div></div>
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon" style="background:#dbeafe">📊</div> New Poll</div>
-        <div class="field"><label>Question</label><input class="finput" id="pollQ" placeholder="e.g. Which day works for team lunch?" /></div>
-        <div class="field"><label>Options</label>
-          <div id="pollOptsList">${optsHtml}</div>
-          <button class="btn btn-ghost btn-sm" onclick="addOpt()">+ Add Option</button>
-        </div>
-        <div class="field"><label>Visible To</label><div class="vis-row">${visHtml}</div></div>
-        <button class="btn btn-primary" id="pollBtn" onclick="submitPoll()">📊 Launch Poll</button>
-      </div>`;
-  }
-
-  window.addOpt = function() { S.pollOptions.push(''); renderPage(); };
-  window.removeOpt = function(i) { S.pollOptions.splice(i,1); renderPage(); };
-
-  window.submitPoll = async function() {
-    const q = document.getElementById('pollQ').value.trim();
-    const opts = S.pollOptions.filter(o=>o.trim());
-    if (!q || opts.length < 2) { alert('Please enter a question and at least 2 options.'); return; }
-    const btn = document.getElementById('pollBtn');
-    btn.disabled = true; btn.textContent = 'Launching...';
-    const votes = {};
-    opts.forEach(o => votes[o] = 0);
-    try {
-      await addDoc(collection(db, 'updates'), {
-        type: 'poll', question: q, options: opts, votes,
-        visibility: [...S.selectedVisibility],
-        votedBy: [],
-        createdAt: serverTimestamp()
-      });
-      S.pollOptions = ['',''];
-      S.selectedVisibility = ['all'];
-      S.activePage = 'feed';
-      renderSidebar();
-      renderPage();
-      showToast('✅ Poll launched!');
-    } finally {
-      btn.disabled = false; btn.textContent = '📊 Launch Poll';
-    }
-  };
-
-  // ASSOCIATES PAGE
-  async function renderAssocPage(main) {
-    await loadAssociates();
-    main.innerHTML = `
-      <div class="page-header"><div class="page-title">Manage Associates</div></div>
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon" style="background:#ede9fe">➕</div> Add New Associate</div>
-        <div class="frow">
-          <div class="field"><label>Employee ID</label><input class="finput" id="nId" placeholder="EMP005" /></div>
-          <div class="field"><label>Full Name</label><input class="finput" id="nName" placeholder="Full name" /></div>
-        </div>
-        <div class="frow">
-          <div class="field"><label>Password</label><input class="finput" id="nPwd" placeholder="Password" /></div>
-          <div class="field"><label>Role</label>
-            <select class="fselect" id="nRole">
-              <option value="associate">Associate</option>
-              <option value="manager">Manager</option>
-            </select>
-          </div>
-          <div class="field"><label>Department</label>
-            <select class="fselect" id="nGroup">
-              ${GROUPS.filter(g=>g!=='all').map(g=>`<option value="${g}">${g.charAt(0).toUpperCase()+g.slice(1)}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-        <button class="btn btn-green" id="addBtn" onclick="addAssoc()">+ Add Associate</button>
+async function renderAssocs(main){
+  await loadAssocs();
+  main.innerHTML=`<div class="ph"><div class="ptitle">Manage Associates</div></div>
+    <div class="card">
+      <div class="ct">Add New Associate</div>
+      <div class="fr">
+        <div class="fld"><label>Employee ID</label><input class="fi" id="nid" placeholder="EMP005"/></div>
+        <div class="fld"><label>Full Name</label><input class="fi" id="nnm" placeholder="Full name"/></div>
       </div>
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon" style="background:#f1f5f9">👥</div> All Associates (${S.associates.length})</div>
-        <table class="assoc-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            ${S.associates.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--slate);padding:24px">No associates added yet</td></tr>` :
-            S.associates.map(a=>`
-              <tr>
-                <td><strong>${esc(a.id)}</strong></td>
-                <td>${esc(a.name)}</td>
-                <td>${a.role}</td>
-                <td><span class="group-badge">${a.group}</span></td>
-                <td><span class="status-dot ${a.status==='active'?'status-active':'status-inactive'}">${a.status==='active'?'🟢 Active':'🔴 Inactive'}</span></td>
-                <td>
-                  <div class="action-btns">
-                    ${a.status==='active'
-                      ? `<button class="btn btn-ghost btn-sm" onclick="toggleStatus('${a.firestoreId}','inactive')">🔴 Deactivate</button>`
-                      : `<button class="btn btn-green btn-sm" onclick="toggleStatus('${a.firestoreId}','active')">🟢 Reactivate</button>`}
-                    <button class="btn btn-danger btn-sm" onclick="removeAssoc('${a.firestoreId}')">🗑</button>
-                  </div>
-                </td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  }
+      <div class="fr">
+        <div class="fld"><label>Password</label><input class="fi" id="npw" placeholder="Password"/></div>
+        <div class="fld"><label>Role</label><select class="fs" id="nrl"><option value="associate">Associate</option><option value="manager">Manager</option></select></div>
+        <div class="fld"><label>Department</label><select class="fs" id="ngp">${GROUPS.filter(g=>g!=='all').map(g=>`<option value="${g}">${g.charAt(0).toUpperCase()+g.slice(1)}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn bg2" id="abtn" onclick="addAssoc()">+ Add Associate</button>
+    </div>
+    <div class="card">
+      <div class="ct">All Associates (${S.assocs.length})</div>
+      <table class="at">
+        <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${S.assocs.length===0?`<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--sl)">No associates yet. Add your first one above!</td></tr>`:
+        S.assocs.map(a=>`<tr>
+          <td><strong>${esc(a.id)}</strong></td>
+          <td>${esc(a.name)}</td>
+          <td>${a.role}</td>
+          <td><span class="gbadge">${a.group}</span></td>
+          <td><span class="sdot ${a.status==='active'?'sact':'sinact'}">${a.status==='active'?'Active':'Inactive'}</span></td>
+          <td><div class="abts">
+            ${a.status==='active'?`<button class="btn bgh bsm" onclick="togSt('${a.fid}','inactive')">Deactivate</button>`:`<button class="btn bg2 bsm" onclick="togSt('${a.fid}','active')">Reactivate</button>`}
+            <button class="btn bdr bsm" onclick="remAssoc('${a.fid}')">Delete</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
 
-  window.addAssoc = async function() {
-    const id = document.getElementById('nId').value.trim().toUpperCase();
-    const name = document.getElementById('nName').value.trim();
-    const pwd = document.getElementById('nPwd').value.trim();
-    const role = document.getElementById('nRole').value;
-    const group = document.getElementById('nGroup').value;
-    if (!id || !name || !pwd) { alert('Please fill all fields.'); return; }
-    if (S.associates.find(a => a.id === id)) { alert('Employee ID already exists.'); return; }
-    const btn = document.getElementById('addBtn');
-    btn.disabled = true; btn.textContent = 'Adding...';
-    try {
-      await addDoc(collection(db, 'associates'), { id, name, password: pwd, role, group, status: 'active', createdAt: serverTimestamp() });
-      await loadAssociates();
-      renderPage();
-      showToast('✅ Associate added!');
-    } finally {
-      btn.disabled = false; btn.textContent = '+ Add Associate';
-    }
-  };
+window.addAssoc=async function(){
+  const id=document.getElementById('nid').value.trim().toUpperCase();
+  const name=document.getElementById('nnm').value.trim();
+  const pwd=document.getElementById('npw').value.trim();
+  const role=document.getElementById('nrl').value;
+  const group=document.getElementById('ngp').value;
+  if(!id||!name||!pwd){alert('Please fill all fields.');return;}
+  if(S.assocs.find(a=>a.id===id)){alert('ID already exists.');return;}
+  const btn=document.getElementById('abtn'); btn.disabled=true; btn.textContent='Adding...';
+  try{
+    await addDoc(collection(db,'associates'),{id,name,password:pwd,role,group,status:'active',createdAt:serverTimestamp()});
+    await loadAssocs(); renderPage(); toastMsg('Associate added!');
+  }finally{btn.disabled=false;btn.textContent='+ Add Associate';}
+};
 
-  window.toggleStatus = async function(firestoreId, newStatus) {
-    await updateDoc(doc(db, 'associates', firestoreId), { status: newStatus });
-    await loadAssociates();
-    renderPage();
-    showToast(newStatus === 'active' ? '✅ Account reactivated' : '🔴 Account deactivated');
-  };
+window.togSt=async function(fid,ns){
+  await updateDoc(doc(db,'associates',fid),{status:ns});
+  await loadAssocs(); renderPage();
+  toastMsg(ns==='active'?'Account reactivated':'Account deactivated');
+};
 
-  window.removeAssoc = async function(firestoreId) {
-    if (!confirm('Permanently delete this associate?')) return;
-    await deleteDoc(doc(db, 'associates', firestoreId));
-    await loadAssociates();
-    renderPage();
-    showToast('🗑 Associate removed');
-  };
+window.remAssoc=async function(fid){
+  if(!confirm('Permanently delete this associate?'))return;
+  await deleteDoc(doc(db,'associates',fid));
+  await loadAssocs(); renderPage(); toastMsg('Associate removed');
+};
 
-  // ===== UTILS =====
-  function fmtDate(ts) {
-    if (!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  }
-
-  function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
-  }
-
-  // Expose S globally for inline handlers
-  window.S = S;
-
-  init();
+function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toastMsg(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+window.S=S;
 </script>
 </body>
 </html>
