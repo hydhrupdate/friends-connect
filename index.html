@@ -917,10 +917,17 @@
 
   // ===== INIT =====
   async function init() {
-    // Seed default HR admin credentials check — load associates from Firestore
-    await loadAssociates();
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
+    try {
+      await Promise.race([
+        loadAssociates(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+      ]);
+    } catch(e) {
+      console.warn('Firebase init issue:', e);
+    } finally {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
   }
 
   async function loadAssociates() {
