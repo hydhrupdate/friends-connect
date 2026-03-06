@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Connect</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:white;padding:36px;border-radius:16px;width:340px}
+h2{font-size:22px;font-weight:800;margin-bottom:4px}
+h2 span{color:#059669}
+p{color:#666;font-size:13px;margin-bottom:20px}
+label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:5px}
+input{width:100%;padding:12px;border:2px solid #eee;border-radius:8px;font-size:14px;margin-bottom:14px;outline:none}
+input:focus{border-color:#059669}
+button{width:100%;padding:13px;background:#059669;border:none;border-radius:8px;color:white;font-size:15px;font-weight:700;cursor:pointer}
+button:hover{background:#047857}
+.msg{margin-top:10px;padding:8px;border-radius:6px;font-size:13px;text-align:center;display:none}
+.err{background:#fee2e2;color:#dc2626}
+.ok{background:#d1fae5;color:#059669}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>HR <span>Connect</span></h2>
+  <p>Sign in to your portal</p>
+  <label>Employee ID / Admin ID</label>
+  <input type="text" id="uid" placeholder="e.g. HRADMIN or EMP001" />
+  <label>Password</label>
+  <input type="password" id="pwd" placeholder="Enter password" />
+  <button onclick="doLogin()">Sign In</button>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+function doLogin() {
+  var id = document.getElementById('uid').value.trim().toUpperCase();
+  var pwd = document.getElementById('pwd').value.trim();
+  
+  if (!id || !pwd) {
+    show('Please enter ID and password', 'err');
+    return;
+  }
+  
+  if (id === 'HRADMIN' && pwd === 'hr@2024') {
+    show('Login successful! Loading...', 'ok');
+    setTimeout(function() {
+      window.location.href = 'dashboard.html';
+    }, 1000);
+    return;
+  }
+  
+  show('Invalid credentials. Try HRADMIN / hr@2024', 'err');
+}
+
+function show(msg, type) {
+  var el = document.getElementById('msg');
+  el.textContent = msg;
+  el.className = 'msg ' + type;
+  el.style.display = 'block';
+}
+
+document.getElementById('pwd').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
