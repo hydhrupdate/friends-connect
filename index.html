@@ -72,6 +72,7 @@ body{font-family:Arial,sans-serif;background:#f1f5f9;min-height:100vh}
 .vchip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid #e5e7eb;background:white;cursor:pointer;color:#666}
 .vchip.on{border-color:#2563eb;background:#dbeafe;color:#2563eb}
 .toast{position:fixed;bottom:18px;right:18px;background:#111;color:white;padding:11px 16px;border-radius:9px;font-size:13px;display:none;z-index:999}
+.nbadge{display:inline-block;background:#dc2626;color:white;font-size:10px;font-weight:800;padding:1px 5px;border-radius:20px;margin-left:5px;vertical-align:middle}
 .empty{text-align:center;padding:36px;color:#94a3b8;font-size:13px}
 .lbl{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;margin-top:4px}
 @media(max-width:580px){.stats{grid-template-columns:repeat(2,1fr)}}
@@ -183,6 +184,9 @@ document.getElementById('t2').onclick = function() { setRole('hr'); };
 document.getElementById('lbtn').onclick = login;
 document.getElementById('lpwd').onkeydown = function(e) { if (e.key === 'Enter') login(); };
 document.getElementById('outBtn').onclick = logout;
+// Register service worker on page load
+registerServiceWorker();
+
 fsGet('associates').then(function(a) {
   S.assocs = a;
   // Restore session on refresh
@@ -228,6 +232,10 @@ function enterDash(user) {
   renderNav();
   renderPage();
   loadData();
+  // Request push permission for associates (not HR)
+  if (user.role !== 'hr') {
+    requestPushPermission();
+  }
 }
 function logout() {
   CU = null;
@@ -239,6 +247,7 @@ function logout() {
 }
 async function loadData() {
   S.updates = await fsGet('updates');
+  if (LAST_UPDATE_COUNT === 0) LAST_UPDATE_COUNT = S.updates.length;
   S.updates.sort(function(a,b) { return (b.createdAt||'') > (a.createdAt||'') ? 1 : -1; });
   S.assocs = await fsGet('associates');
   renderPage();
@@ -250,10 +259,15 @@ function renderNav() {
   if (CU.role === 'hr') items = items.concat([{id:'post',l:'Post Update'},{id:'poll',l:'Create Poll'},{id:'assocs',l:'Associates'}]);
   var nav = document.getElementById('nav');
   nav.innerHTML = '';
+  var newCount = CU.role !== 'hr' ? countNewUpdates() : 0;
   items.forEach(function(i) {
     var b = document.createElement('button');
     b.className = 'nb' + (S.page === i.id ? ' on' : '');
-    b.textContent = i.l;
+    if (i.id === 'feed' && newCount > 0) {
+      b.innerHTML = i.l + '<span class="nbadge">'+newCount+'</span>';
+    } else {
+      b.textContent = i.l;
+    }
     b.onclick = function() { goTo(i.id); };
     nav.appendChild(b);
   });
@@ -270,6 +284,8 @@ function renderPage() {
 
 // FEED
 function renderFeed(m) {
+  // Mark updates as seen
+  setLastSeenTime();
   var isHR = CU.role === 'hr';
   var items = S.updates.filter(function(u) {
     if (isHR) return true;
@@ -480,6 +496,7 @@ async function subPost() {
   } else {
     await fsAdd('updates',{type:'update',title:t,body:b,tag:S.tag,visibility:S.vis.slice(),author:CU.name,image:'',createdAt:new Date().toISOString()});
     toast('Published!'); S.tag = 'announcement'; S.vis = ['all'];
+    sendPushNotification(t, b.substring(0,80)+(b.length>80?'...':''));
     await loadData(); goTo('feed');
   }
 }
@@ -553,6 +570,7 @@ async function subPoll() {
   opts.forEach(function(o) { votes[o] = 0; });
   await fsAdd('updates',{type:'poll',question:q,options:opts,votes:votes,visibility:S.vis.slice(),votedBy:[],voterChoices:'',createdAt:new Date().toISOString()});
   toast('Poll launched!'); S.popts = ['','']; S.vis = ['all'];
+  sendPushNotification('New Poll', q);
   await loadData(); goTo('feed');
 }
 
@@ -613,6 +631,97 @@ async function remA(fid) {
   await fsDel('associates', fid);
   toast('Removed!');
   await renderAssocsPg(document.getElementById('main'));
+}
+
+// SERVICE WORKER + NOTIFICATIONS
+var SW_REG = null;
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    SW_REG = await navigator.serviceWorker.register('./sw.js');
+    console.log('SW registered');
+    // Start background polling every 30 seconds
+    startBackgroundCheck();
+  } catch(e) {
+    console.log('SW registration failed:', e);
+  }
+}
+
+var BG_INTERVAL = null;
+var LAST_UPDATE_COUNT = 0;
+
+function startBackgroundCheck() {
+  if (BG_INTERVAL) clearInterval(BG_INTERVAL);
+  BG_INTERVAL = setInterval(async function() {
+    if (!CU) return;
+    try {
+      var r = await fetch(BASE+'updates?key='+APIKEY+'&pageSize=200');
+      var d = await r.json();
+      var count = (d.documents||[]).length;
+      if (LAST_UPDATE_COUNT > 0 && count > LAST_UPDATE_COUNT) {
+        var diff = count - LAST_UPDATE_COUNT;
+        showBgNotification('New Update Posted', diff+' new update'+(diff>1?'s':'')+' from HR!');
+      }
+      LAST_UPDATE_COUNT = count;
+    } catch(e) {}
+  }, 30000); // check every 30 seconds
+}
+
+function showBgNotification(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    try {
+      if (SW_REG) {
+        SW_REG.showNotification('HR Connect - '+title, {
+          body: body,
+          icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+          badge: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+          tag: 'hr-update',
+          requireInteraction: true,
+          vibrate: [200, 100, 200]
+        });
+      } else {
+        new Notification('HR Connect - '+title, { body: body });
+      }
+    } catch(e) {}
+  }
+}
+
+// NOTIFICATIONS
+function requestPushPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(function(perm) {
+      if (perm === 'granted') {
+        registerServiceWorker();
+        toast('Notifications enabled!');
+      }
+    });
+  } else if (Notification.permission === 'granted') {
+    registerServiceWorker();
+  }
+}
+
+function sendPushNotification(title, body) {
+  showBgNotification(title, body);
+}
+
+function getLastSeenTime() {
+  try { return parseInt(sessionStorage.getItem('lastSeen') || '0'); } catch(e) { return 0; }
+}
+
+function setLastSeenTime() {
+  try { sessionStorage.setItem('lastSeen', String(Date.now())); } catch(e) {}
+}
+
+function countNewUpdates() {
+  var lastSeen = getLastSeenTime();
+  if (!lastSeen) return 0;
+  return S.updates.filter(function(u) {
+    if (!u.createdAt) return false;
+    return new Date(u.createdAt).getTime() > lastSeen;
+  }).length;
 }
 
 // UTILS
