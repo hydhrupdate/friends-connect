@@ -59,6 +59,7 @@ body{font-family:Arial,sans-serif;background:#f1f5f9;min-height:100vh}
 .utag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase}
 .ta{background:#d1fae5;color:#059669}.tp{background:#fef3c7;color:#d97706}
 .te{background:#dbeafe;color:#2563eb}.tr{background:#fee2e2;color:#dc2626}.tg{background:#f1f5f9;color:#666}
+.tb2{background:#fdf4ff;color:#7e22ce}
 .ut{font-size:14px;font-weight:700;color:#111;margin-bottom:4px}
 .ub{font-size:13px;color:#4b5563;line-height:1.6;white-space:pre-wrap}
 .uf{margin-top:9px;padding-top:8px;border-top:1px solid #f1f5f9;font-size:11px;color:#999;display:flex;justify-content:space-between}
@@ -140,7 +141,7 @@ var HRPWD = 'hr@2024';
 var PROJECT = 'hr-connect-3c286';
 var APIKEY = 'AIzaSyA-5I3dKQnFaYF0I1tOUyYcRP-mhgEBlW0';
 var BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/';
-var TAGS = ['announcement','policy','event','reminder','general'];
+var TAGS = ['announcement','policy','event','reminder','general','birthday'];
 var GROUPS = ['all','managers','sales','it','hr','operations'];
 var CU = null;
 var S = {updates:[],assocs:[],page:'feed',tag:'announcement',vis:['all'],popts:['',''],filter:'all'};
@@ -283,6 +284,7 @@ async function loadData() {
   S.updates.sort(function(a,b) { return (b.createdAt||'') > (a.createdAt||'') ? 1 : -1; });
   S.assocs = await fsGet('associates');
   renderPage();
+  if (CU && CU.role === 'hr') checkAndPostBirthdays();
 }
 
 // NAV
@@ -339,8 +341,8 @@ function renderFeed(m) {
     html += '<div class="stat"><div class="sn">'+S.assocs.filter(function(a){return a.status==='inactive';}).length+'</div><div class="sl">Inactive</div></div>';
     html += '</div>';
   }
-  var fls = ['all','announcement','policy','event','reminder','poll'];
-  var fln = {all:'All',announcement:'Announcements',policy:'Policy',event:'Events',reminder:'Reminders',poll:'Polls'};
+  var fls = ['all','announcement','policy','event','reminder','poll','birthday'];
+  var fln = {all:'All',announcement:'Announcements',policy:'Policy',event:'Events',reminder:'Reminders',poll:'Polls',birthday:'🎂 Birthdays'};
   html += '<div class="fps">';
   fls.forEach(function(f) { html += '<button class="fp'+(S.filter===f?' on':'')+'" data-f="'+f+'">'+fln[f]+'</button>'; });
   html += '</div><div id="flist"></div>';
@@ -354,7 +356,7 @@ function renderFeed(m) {
   fl.querySelectorAll('.dlBtn').forEach(function(b) { b.onclick = function() { downloadVotes(this.dataset.pid); }; });
 }
 function makeUpdate(u, isHR) {
-  var tc = {announcement:'ta',policy:'tp',event:'te',reminder:'tr',general:'tg'}[u.tag] || 'tg';
+  var tc = {announcement:'ta',policy:'tp',event:'te',reminder:'tr',general:'tg',birthday:'tb2'}[u.tag] || 'tg';
   var img = u.image ? '<img src="'+u.image+'" style="max-width:100%;border-radius:8px;margin:10px 0"/>' : '';
   return '<div class="uc">'+
     '<div class="utop"><span class="utag '+tc+'">'+(u.tag||'general')+'</span>'+
@@ -1187,6 +1189,74 @@ function changePwd(fid, empId) {
 function closePwdModal() {
   var m = document.getElementById('pwdModal');
   if (m) m.remove();
+}
+
+// BIRTHDAY AUTO POST
+async function checkAndPostBirthdays() {
+  try {
+    var today = new Date();
+    var todayMM = String(today.getMonth()+1).padStart(2,'0');
+    var todayDD = String(today.getDate()).padStart(2,'0');
+    var todayKey = todayMM+'-'+todayDD; // e.g. "03-13"
+    var todayDate = today.toISOString().slice(0,10); // e.g. "2026-03-13"
+
+    // Check if birthday post already made today
+    var bdayPosts = S.updates.filter(function(u) {
+      return u.tag === 'birthday' && u.createdAt && u.createdAt.slice(0,10) === todayDate;
+    });
+    if (bdayPosts.length > 0) return; // Already posted today
+
+    // Find associates with birthday today
+    var assocs = await fsGet('associates');
+    var bdays = assocs.filter(function(a) {
+      if (!a.dob || a.status !== 'active') return false;
+      // dob stored as YYYY-MM-DD, extract MM-DD
+      var parts = a.dob.split('-');
+      if (parts.length < 3) return false;
+      var mm = parts[1].padStart(2,'0');
+      var dd = parts[2].padStart(2,'0');
+      return (mm+'-'+dd) === todayKey;
+    });
+
+    if (bdays.length === 0) return; // No birthdays today
+
+    // Build birthday message
+    var names = bdays.map(function(a) { return a.name; });
+    var title = '🎂 Birthday Wishes!';
+    var body = '';
+    if (names.length === 1) {
+      body = 'Wishing ' + names[0] + ' a very Happy Birthday! 🎉🎈\n\nMay your day be filled with joy and happiness. The entire team wishes you a wonderful birthday!';
+    } else {
+      body = 'Wishing a very Happy Birthday to our wonderful team members:\n\n' +
+        names.map(function(n){ return '🎂 '+n; }).join('\n') +
+        '\n\nMay this special day bring you all lots of joy and happiness! 🎉🎈';
+    }
+
+    // Post to HR updates with tag 'birthday'
+    await fsAdd('updates', {
+      type: 'update',
+      title: title,
+      body: body,
+      tag: 'birthday',
+      visibility: ['managers','sales','it','hr','operations'],
+      author: 'HR Admin',
+      image: '',
+      createdAt: new Date().toISOString()
+    });
+
+    // Reload updates
+    S.updates = await fsGet('updates');
+    S.updates.sort(function(a,b) { return (b.createdAt||'') > (a.createdAt||'') ? 1 : -1; });
+
+    // Send push notification
+    sendPushNotification('Birthday Today! 🎂', names.join(', ') + (names.length===1?' has':'') + ' a birthday today!');
+
+    toast('🎂 Birthday post created for: '+names.join(', '));
+
+    if (S.page === 'feed') renderPage();
+  } catch(e) {
+    console.log('Birthday check error:', e);
+  }
 }
 
 // UTILS
