@@ -137,7 +137,7 @@ body{font-family:Arial,sans-serif;background:#f1f5f9;min-height:100vh}
 <script>
 
 var HRPWD = 'hr@2024';
-function isHRUser() { return CU && (CU.role === 'hr' || CU.role === 'hr admin' || CU.id === 'HRADMIN'); }
+function isHRUser() { var r = CU && (CU.role||'').toString().trim().toLowerCase(); return CU && (r === 'hr' || r === 'hr admin' || r === 'hradmin' || CU.id === 'HRADMIN'); }
 var PROJECT = 'hr-connect-3c286';
 var APIKEY = 'AIzaSyA-5I3dKQnFaYF0I1tOUyYcRP-mhgEBlW0';
 var BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/';
@@ -232,6 +232,8 @@ function login() {
   var u = S.assocs.find(function(a) { return a.id === id && a.password === pwd; });
   if (u) {
     if (u.status === 'inactive') { err.textContent = 'Account deactivated.'; err.style.display = 'block'; return; }
+    // Normalise role to lowercase trimmed
+    u.role = (u.role || 'associate').toString().trim().toLowerCase();
     enterDash(u); return;
   }
   err.textContent = 'Invalid credentials.';
