@@ -121,7 +121,7 @@ async function main() {
       const names = bdays.map(a => a.name);
       const title = '🎂 Birthday Wishes!';
       const body = names.length === 1
-        ? `Wishing **${names[0]}** a very Happy Birthday! 🎉🎈\n\nMay your day be filled with joy and happiness. The entire MINUTES team wishes you a wonderful birthday!`
+        ? `Wishing **${names[0]}** a very Happy Birthday! 🎉🎈\n\nMay your day be filled with joy and happiness. The entire team wishes you a wonderful birthday!`
         : `Wishing a very Happy Birthday to our wonderful team members:\n\n${names.map(n => '🎂 **' + n + '**').join('\n')}\n\nMay this special day bring you all lots of joy and happiness! 🎉🎈`;
  
       // Use first birthday person's photo if available
